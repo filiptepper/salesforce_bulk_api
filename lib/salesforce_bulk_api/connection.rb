@@ -27,11 +27,12 @@ require 'timeout'
       case client_type
       when "Restforce::Data::Client"
         @session_id=@client.options[:oauth_token]
-        @server_url=@client.options[:instance_url]
       else
         @session_id=@client.oauth_token
-        @server_url=@client.instance_url
       end
+
+      @server_url = @client.instance_url
+
       @instance = parse_instance()
       @@INSTANCE_HOST = "#{@instance}.salesforce.com"
     end
@@ -39,7 +40,7 @@ require 'timeout'
     def post_xml(host, path, xml, headers)
       host = host || @@INSTANCE_HOST
       if host != @@LOGIN_HOST # Not login, need to add session id to header
-        headers['X-SFDC-Session'] = @session_id;
+        headers['X-SFDC-Session'] = "OAuth #{@session_id}"
         path = "#{@@PATH_PREFIX}#{path}"
       end
       i = 0
@@ -61,7 +62,7 @@ require 'timeout'
       host = host || @@INSTANCE_HOST
       path = "#{@@PATH_PREFIX}#{path}"
       if host != @@LOGIN_HOST # Not login, need to add session id to header
-        headers['X-SFDC-Session'] = @session_id;
+        headers['X-SFDC-Session'] = "OAuth #{@session_id}"
       end
       https(host).get(path, headers).body
     end
